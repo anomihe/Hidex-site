@@ -1,0 +1,504 @@
+<title>HIDEX</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root {
+    --ink: #14161B;
+    --ink-soft: #565A62;
+    --ink-faint: #8A8E94;
+    --paper: #F4F4F1;
+    --panel: #FFFFFF;
+    --line: #DEDDD6;
+    --accent: #1B5E4F;
+    --accent-ink: #F5FAF8;
+    --warm: #C97A2E;
+    --shadow: rgba(20, 22, 27, 0.06);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ECEDE8;
+      --ink-soft: #A9ADB3;
+      --ink-faint: #6C7076;
+      --paper: #101214;
+      --panel: #17191D;
+      --line: #2A2D31;
+      --accent: #35A187;
+      --accent-ink: #08120F;
+      --warm: #E2954B;
+      --shadow: rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #ECEDE8;
+    --ink-soft: #A9ADB3;
+    --ink-faint: #6C7076;
+    --paper: #101214;
+    --panel: #17191D;
+    --line: #2A2D31;
+    --accent: #35A187;
+    --accent-ink: #08120F;
+    --warm: #E2954B;
+    --shadow: rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  a { color: inherit; }
+
+  .label {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  h1, h2, h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  /* ---------- Header ---------- */
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+  }
+
+  .wordmark {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 500;
+    font-size: 1.05rem;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .wordmark .dot {
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 1px;
+    display: inline-block;
+  }
+
+  .navlinks {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9rem;
+  }
+
+  .navlinks a {
+    text-decoration: none;
+    color: var(--ink-soft);
+    transition: color 0.15s ease;
+  }
+
+  .navlinks a:hover, .navlinks a:focus-visible {
+    color: var(--ink);
+  }
+
+  .navlinks a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
+
+  /* ---------- Hero ---------- */
+
+  .hero {
+    position: relative;
+    padding: 96px 32px 88px;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 70% 60% at 70% 20%, black, transparent);
+    animation: drift 40s linear infinite;
+  }
+
+  @keyframes drift {
+    from { background-position: 0 0, 0 0; }
+    to { background-position: 56px 112px, 56px 112px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-grid { animation: none; }
+  }
+
+  .hero-inner {
+    position: relative;
+    max-width: 1080px;
+    margin: 0 auto;
+    opacity: 0;
+    transform: translateY(14px);
+    animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) 0.1s forwards;
+  }
+
+  @keyframes rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-inner { opacity: 1; transform: none; animation: none; }
+  }
+
+  .hero .label { margin-bottom: 18px; }
+
+  .hero h1 {
+    font-size: clamp(2.6rem, 6vw, 4.4rem);
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+    max-width: 15ch;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero p.lede {
+    margin-top: 22px;
+    max-width: 52ch;
+    font-size: 1.15rem;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- Sections ---------- */
+
+  section {
+    padding: 76px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .section-head h2 {
+    font-size: 1.9rem;
+  }
+
+  .section-head p {
+    max-width: 40ch;
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+    margin: 0;
+  }
+
+  /* About */
+
+  .about-body {
+    max-width: 66ch;
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+  }
+
+  .about-body p + p { margin-top: 16px; }
+
+  .about-body strong { color: var(--ink); font-weight: 600; }
+
+  /* What we build */
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+
+  .card {
+    background: var(--panel);
+    padding: 28px 26px;
+    transition: background 0.15s ease;
+  }
+
+  .card:hover {
+    background: color-mix(in srgb, var(--accent) 6%, var(--panel));
+  }
+
+  .card .label { color: var(--accent); margin-bottom: 14px; }
+
+  .card h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .card p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 0.94rem;
+  }
+
+  /* Approach */
+
+  .approach-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-width: 66ch;
+  }
+
+  .approach-list li {
+    display: flex;
+    gap: 24px;
+    padding: 22px 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .approach-list li:last-child { border-bottom: 1px solid var(--line); }
+
+  .approach-list .mark {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--warm);
+    font-size: 0.85rem;
+    padding-top: 2px;
+    flex-shrink: 0;
+    width: 2.4ch;
+  }
+
+  .approach-list h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .approach-list p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+
+  /* Contact */
+
+  .contact-panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    padding: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .contact-panel h2 {
+    font-size: 1.9rem;
+    max-width: 16ch;
+  }
+
+  .contact-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    text-decoration: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.92rem;
+    padding: 14px 22px;
+    border: 1px solid var(--accent);
+    transition: opacity 0.15s ease;
+  }
+
+  .contact-cta:hover { opacity: 0.88; }
+
+  .contact-cta:focus-visible {
+    outline: 2px solid var(--warm);
+    outline-offset: 3px;
+  }
+
+  .contact-meta {
+    margin-top: 14px;
+    color: var(--ink-faint);
+    font-size: 0.85rem;
+  }
+
+  /* Footer */
+
+  footer {
+    padding: 32px 0 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    color: var(--ink-faint);
+    font-size: 0.82rem;
+  }
+
+  footer .wordmark {
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+  }
+
+  footer .wordmark .dot { background: var(--ink-faint); }
+
+  @media (max-width: 640px) {
+    .nav { padding: 16px 20px; }
+    .navlinks { gap: 16px; font-size: 0.82rem; }
+    .hero { padding: 64px 20px 56px; }
+    .wrap { padding: 0 20px; }
+    .contact-panel { padding: 32px 24px; }
+  }
+</style>
+
+<header>
+  <nav class="nav wrap" style="padding-left:0; padding-right:0;">
+    <a class="wordmark" href="#top"><span class="dot"></span>HIDEX</a>
+    <ul class="navlinks">
+      <li><a href="#about">Overview</a></li>
+      <li><a href="#build">What We Build</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<div id="top" class="hero">
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="hero-inner wrap">
+    <p class="label">Software division of the HIDEX group</p>
+    <h1>One organization, <em>several</em> apps.</h1>
+    <p class="lede">HIDEX designs, builds, and maintains a portfolio of mobile applications — including houseX and NearbyYou — under a single organization, rather than shipping them as disconnected side projects.</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section id="about">
+    <div class="section-head">
+      <h2>Overview</h2>
+    </div>
+    <div class="about-body">
+      <p><strong>HIDEX</strong> is an organization with a dedicated software division. We build and maintain a small portfolio of mobile applications under one consistent organization, rather than as disconnected side projects — this site represents that software division.</p>
+      <p>Outside of software, HIDEX also operates in industrial oil tools supply. The two sides run independently; this site covers the software division only.</p>
+    </div>
+  </section>
+
+  <section id="build">
+    <div class="section-head">
+      <h2>What we build</h2>
+      <p>Apps published under the HIDEX organization. Each one is scoped, built, and maintained on its own.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <p class="label">App</p>
+        <h3>houseX</h3>
+        <p>A real estate and housing marketplace — browse, list, and find properties.</p>
+      </div>
+      <div class="card">
+        <p class="label">App</p>
+        <h3>NearbyYou</h3>
+        <p>A local discovery app for finding what's around you.</p>
+      </div>
+      <div class="card">
+        <p class="label">In progress</p>
+        <h3>More on the way</h3>
+        <p>Additional apps are in development under the same organization.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="approach">
+    <div class="section-head">
+      <h2>Approach</h2>
+      <p>A few things that stay constant across everything we release.</p>
+    </div>
+    <ul class="approach-list">
+      <li>
+        <span class="mark">01</span>
+        <div>
+          <h3>Small team, direct ownership</h3>
+          <p>Every app has a clear owner inside the organization — no hand-offs, no orphaned releases.</p>
+        </div>
+      </li>
+      <li>
+        <span class="mark">02</span>
+        <div>
+          <h3>Maintained, not just launched</h3>
+          <p>We treat shipping as the start of the work, not the end of it — updates and support continue after release.</p>
+        </div>
+      </li>
+      <li>
+        <span class="mark">03</span>
+        <div>
+          <h3>Privacy-conscious by default</h3>
+          <p>We collect what an app needs to function and no more, and we say so plainly in each app's listing.</p>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <section id="contact" style="border-bottom:none;">
+    <div class="section-head">
+      <h2>Contact</h2>
+    </div>
+    <div class="contact-panel">
+      <div>
+        <h2>Get in touch with the organization.</h2>
+        <p class="contact-meta">Organization contact — for support, partnership, or verification enquiries.</p>
+      </div>
+      <div>
+        <a class="contact-cta" href="mailto:anomihekenneth@gmail.com">anomihekenneth@gmail.com →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <a class="wordmark" href="#top"><span class="dot"></span>HIDEX</a>
+    <span>© 2026 HIDEX. All rights reserved.</span>
+  </footer>
+
+</div>
