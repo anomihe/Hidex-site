@@ -1,0 +1,51 @@
+name: bible_app
+description: "HIDEX Bible App — groups, live quizzes, reading plans, devotions, studies and treasure hunts."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # Backend
+  supabase_flutter: ^2.10.3
+
+  # Push notifications
+  firebase_core: ^4.1.1
+  firebase_messaging: ^16.0.4
+
+  # State management & navigation
+  flutter_riverpod: ^2.6.1
+  go_router: ^16.2.4
+
+  # Config
+  flutter_dotenv: ^6.0.0
+
+  # Monetization (init stubs — see core/ads and core/billing)
+  google_mobile_ads: ^6.0.0
+  purchases_flutter: ^9.7.0
+
+  # Animation
+  lottie: ^3.3.2
+  rive: ^0.14.1
+
+  # Utilities
+  intl: ^0.20.2
+  cached_network_image: ^3.4.1
+  timeago: ^3.7.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
