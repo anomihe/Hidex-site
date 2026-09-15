@@ -8,9 +8,12 @@ class SupabaseInit {
 
   static Future<void> init() async {
     final url = dotenv.env['SUPABASE_URL'];
-    final anonKey = dotenv.env['SUPABASE_ANON_KEY'];
+    // Supabase's newer "publishable key" format (sb_publishable_...) is
+    // interchangeable with the legacy anon key for client init — same
+    // env var name kept so `.env` doesn't need renaming later.
+    final publishableKey = dotenv.env['SUPABASE_ANON_KEY'];
 
-    if (url == null || url.isEmpty || anonKey == null || anonKey.isEmpty) {
+    if (url == null || url.isEmpty || publishableKey == null || publishableKey.isEmpty) {
       throw StateError(
         'SUPABASE_URL / SUPABASE_ANON_KEY are missing. Copy '
         'flutter_app/.env.example to flutter_app/.env and fill in your '
@@ -18,7 +21,7 @@ class SupabaseInit {
       );
     }
 
-    await Supabase.initialize(url: url, anonKey: anonKey);
+    await Supabase.initialize(url: url, publishableKey: publishableKey);
   }
 }
 

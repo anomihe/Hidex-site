@@ -62,14 +62,24 @@ feature.
 
 ## 1. Set up Supabase
 
-1. Create a project at [supabase.com](https://supabase.com).
-2. In the SQL Editor, run **`supabase/schema.sql`** — this creates every
-   table, RLS policy, helper function/RPC, and the 3 `pg_cron` jobs. It
-   assumes a fresh database; don't run it twice against the same
-   project (it isn't idempotent — use Supabase migrations for changes
-   after this baseline).
-3. Run **`supabase/seed/verse_pool.sql`** to populate `verse_pool`
-   (empty by default otherwise). It's safe to re-run.
+**This repo's dev environment has no route to your Supabase project's
+domain (`*.supabase.co`) or its Postgres port — outbound network here
+is locked to an allowlist that doesn't include it — so the schema has
+never actually been executed against a live database. You need to run
+these two steps yourself.**
+
+1. Create a project at [supabase.com](https://supabase.com) (or use an
+   existing one).
+2. Open the **SQL Editor** in the dashboard, paste in the full contents
+   of **`supabase/schema.sql`**, and run it. This creates every table,
+   RLS policy, helper function/RPC, and the 3 `pg_cron` jobs. It assumes
+   a fresh database; don't run it twice against the same project (it
+   isn't idempotent — use Supabase migrations for changes after this
+   baseline). If it errors partway through, paste the error back and it
+   can be fixed and re-verified by reading through the file — just not
+   executed from here.
+3. Same way, run **`supabase/seed/verse_pool.sql`** to populate
+   `verse_pool` (empty by default otherwise). It's safe to re-run.
 4. Deploy the edge functions (requires the [Supabase
    CLI](https://supabase.com/docs/guides/cli)):
    ```bash
@@ -98,10 +108,22 @@ migration). If you want images for devotions/manuals/groups, create
 buckets from the dashboard (Storage → New bucket) and point the
 relevant `*_image_url` / `*_url` columns at the public URLs.
 
-## 2. Set up Firebase (push notifications)
+## 2. Set up Firebase + Google Sign-In
+
+Sign-in is **Google-only** — there's no email/password form. It works
+by getting a Google ID token natively (via `google_sign_in`) and
+exchanging it for a Supabase session (`supabase.auth.signInWithIdToken`).
+That exchange needs a Google **Web** OAuth Client ID that both sides
+agree on, and the easiest way to get one is through Firebase, which
+also covers push notifications — so do this in one pass:
 
 1. Create a Firebase project, add Android/iOS apps.
-2. Install the [FlutterFire CLI](https://firebase.google.com/docs/flutter/setup)
+2. In the Firebase console: **Authentication → Sign-in method → Google
+   → Enable**. This auto-creates a Web OAuth Client ID (Firebase shows
+   it right there, and it's also visible in Google Cloud Console →
+   APIs & Services → Credentials, listed as "Web client (auto created
+   by Google Service)").
+3. Install the [FlutterFire CLI](https://firebase.google.com/docs/flutter/setup)
    and run, from `flutter_app/`:
    ```bash
    flutterfire configure
@@ -112,9 +134,31 @@ relevant `*_image_url` / `*_url` columns at the public URLs.
    `main.dart`'s Firebase init is wrapped in a try/catch specifically so
    the rest of the app still runs before you've done this step (push
    registration is just skipped until then).
-3. Download a service account JSON (Project settings → Service
+4. Copy the Web Client ID from step 2 into:
+   - `flutter_app/.env` → `GOOGLE_WEB_CLIENT_ID`
+   - Supabase Dashboard → **Authentication → Providers → Google** →
+     enable it and paste the same Client ID (and the matching Client
+     Secret, also in Google Cloud Console credentials) — Supabase
+     verifies the ID token's `aud` claim against this, so the two must
+     match exactly.
+5. iOS only: also copy the iOS Client ID (from `GoogleService-Info.plist`,
+   key `CLIENT_ID`) into `GOOGLE_IOS_CLIENT_ID`, and add its reversed
+   form (`REVERSED_CLIENT_ID` in the same plist) as a URL scheme in
+   `ios/Runner/Info.plist` under `CFBundleURLTypes` — FlutterFire's
+   `flutterfire configure` does not do this step for you.
+6. Android only: add your debug **and** release SHA-1 fingerprints to
+   the Firebase project (Project settings → Your apps → Add
+   fingerprint) — Google Sign-In fails silently without this.
+7. Download a service account JSON (Project settings → Service
    accounts → Generate new private key) and use it for
-   `FCM_SERVICE_ACCOUNT_JSON` above.
+   `FCM_SERVICE_ACCOUNT_JSON` above (this is unrelated to sign-in —
+   it's what lets `send_push` actually call the FCM API).
+
+None of steps 1–2 and 5–7 can be done from this dev environment — they
+require a real Google/Firebase account and, for Android/iOS, a real
+signing key. Everything on the code side (the `GoogleAuthInit` bootstrap,
+`AuthService.signInWithGoogle`, the `.env` keys it reads) is already
+wired up and waiting for those values.
 
 ## 3. Configure the Flutter app
 
@@ -128,8 +172,9 @@ flutter run
 
 `.env` is gitignored — `.env.example` documents every key, including
 placeholder AdMob test app IDs (safe to leave as-is until you have real
-ones) and empty RevenueCat keys (billing init silently no-ops without
-them).
+ones), empty RevenueCat keys (billing init silently no-ops without
+them), and empty Google sign-in keys (the sign-in button shows an
+in-app error instead of crashing until those are filled in).
 
 ## What's built
 
@@ -138,7 +183,8 @@ them).
   (`submit_quiz_answer` RPC — clients never see `correct_option`), and
   3 cron jobs (`advance-quiz-status` every minute, `reset-stale-streaks`
   daily, `close-expired-hunts` every 5 minutes).
-- **Auth**: email/password sign up & sign in.
+- **Auth**: Google Sign-In only (`google_sign_in` → ID token →
+  `supabase.auth.signInWithIdToken`). No email/password form.
 - **Groups**: create, join by invite code, member list, per-group quiz
   and hunt lists.
 - **Live quiz**: join-window countdown → live participant list → timed
@@ -159,6 +205,15 @@ them).
 
 ## Known gaps (carried over / still open)
 
+- **`schema.sql` / `verse_pool.sql` have not been run against any real
+  project** — this dev environment can't reach `*.supabase.co` at all
+  (network policy), so this has only ever been verified by careful
+  reading, not execution. Run the two SQL files yourself per the setup
+  steps above and report back anything that errors.
+- **Google Sign-In has no real OAuth client yet** — `GOOGLE_WEB_CLIENT_ID`
+  / `GOOGLE_IOS_CLIENT_ID` are blank in `.env` until you complete the
+  Firebase + Google Cloud steps above. Until then, tapping "Continue
+  with Google" shows a clear in-app error instead of crashing.
 - **Quiz & hunt content authoring**: there's a minimal "schedule a
   quiz" form (title/time/join window) for testing the participant flow,
   but no UI to author quiz questions or hunt tasks — add rows to
@@ -170,10 +225,12 @@ them).
 - **AdMob/RevenueCat**: SDKs initialize (with Google's test AdMob app
   IDs by default), but no ad units or paywall/entitlement UI are placed
   anywhere yet.
-- **No automated tests** beyond a placeholder smoke test — nothing here
-  has been exercised against a real Supabase project (this environment
-  has no Supabase credentials), so run through the flows manually after
-  filling in `.env`.
+- **No automated tests** beyond a placeholder smoke test, and nothing
+  here has run against a real device/emulator or a live Supabase
+  project — this dev environment has neither. `flutter analyze` and
+  `flutter test` are clean, but that only proves the code compiles, not
+  that the flows work end-to-end. Run through them manually once
+  Supabase + Firebase are set up.
 - **Animations**: Lottie/Rive are installed but unused.
 
 ## Useful commands

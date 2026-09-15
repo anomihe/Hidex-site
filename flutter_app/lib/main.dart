@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/ads/ads_service.dart';
 import 'core/auth/auth_providers.dart';
+import 'core/auth/google_auth_init.dart';
 import 'core/billing/revenuecat_service.dart';
 import 'core/notifications/fcm_service.dart';
 import 'core/router/app_router.dart';
@@ -16,6 +17,7 @@ Future<void> main() async {
 
   await dotenv.load(fileName: '.env');
   await SupabaseInit.init();
+  await GoogleAuthInit.init();
 
   // Firebase requires platform config files (google-services.json /
   // GoogleService-Info.plist, generated via `flutterfire configure`)
