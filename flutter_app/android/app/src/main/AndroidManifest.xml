@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Required for every network call this app makes (Supabase, Google
+         Sign-In, FCM, AdMob, the Bible API) in release builds — the
+         debug manifest gets this for free, release does not. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="bible_app"
         android:name="${applicationName}"
@@ -30,6 +34,12 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- AdMob requires this at the native level before MobileAds.initialize()
+             can succeed — Google's public test App ID by default (safe to ship
+             during development), replace with your real one before release. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

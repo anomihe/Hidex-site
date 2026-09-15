@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/screens/auth_screen.dart';
 import '../../features/devotions/screens/devotion_detail_screen.dart';
 import '../../features/devotions/screens/devotions_feed_screen.dart';
+import '../../features/donation/screens/donation_screen.dart';
 import '../../features/groups/screens/create_group_screen.dart';
 import '../../features/groups/screens/group_detail_screen.dart';
 import '../../features/groups/screens/group_list_screen.dart';
 import '../../features/live_quiz/screens/live_quiz_screen.dart';
+import '../../features/profile/screens/profile_screen.dart';
 import '../../features/reading_plans/screens/reading_plan_detail_screen.dart';
 import '../../features/reading_plans/screens/reading_plans_screen.dart';
 import '../../features/study_manuals/screens/study_manual_viewer_screen.dart';
@@ -51,6 +53,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ]),
           StatefulShellBranch(routes: [
             GoRoute(path: AppRoutes.studyManuals, builder: (context, state) => const StudyManualsScreen()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: AppRoutes.profile, builder: (context, state) => const ProfileScreen()),
           ]),
         ],
       ),
@@ -100,6 +105,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.rewards,
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const RewardsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.donate,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const DonationScreen(),
       ),
     ],
   );

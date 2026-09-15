@@ -6,11 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/ads/ads_service.dart';
 import 'core/auth/auth_providers.dart';
 import 'core/auth/google_auth_init.dart';
-import 'core/billing/revenuecat_service.dart';
 import 'core/notifications/fcm_service.dart';
 import 'core/router/app_router.dart';
 import 'core/supabase/supabase_init.dart';
 import 'core/theme/app_theme.dart';
+import 'shared/widgets/biometric_lock_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +33,6 @@ Future<void> main() async {
   }
 
   await AdsService.init();
-  await RevenueCatService.init();
 
   runApp(ProviderScope(child: BibleApp(firebaseReady: firebaseReady)));
 }
@@ -53,17 +52,16 @@ class _BibleAppState extends ConsumerState<BibleApp> {
     super.initState();
     ref.listenManual(currentUserProvider, (previous, next) {
       if (previous == null && next != null) {
-        _onSignedIn(next.id);
-      } else if (previous != null && next == null) {
-        RevenueCatService.logOut();
+        _onSignedIn();
       }
     });
-    final currentUser = ref.read(currentUserProvider);
-    if (currentUser != null) _onSignedIn(currentUser.id);
+    if (ref.read(currentUserProvider) != null) _onSignedIn();
   }
 
-  Future<void> _onSignedIn(String userId) async {
-    await RevenueCatService.identify(userId);
+  Future<void> _onSignedIn() async {
+    // The Google-backed Supabase session persists on its own (no
+    // password, no forced re-login) — this just registers the device
+    // for push once we know who's signed in.
     if (widget.firebaseReady) {
       await fcmService.registerDevice();
     }
@@ -79,6 +77,7 @@ class _BibleAppState extends ConsumerState<BibleApp> {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       routerConfig: router,
+      builder: (context, child) => BiometricLockGate(child: child ?? const SizedBox.shrink()),
     );
   }
 }

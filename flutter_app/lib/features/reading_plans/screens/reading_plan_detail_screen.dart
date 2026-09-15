@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/bible/bible_providers.dart';
 import '../providers/reading_plans_providers.dart';
 import '../services/reading_plans_service.dart';
 
@@ -108,7 +109,7 @@ class _ReadingPlanDetailScreenState extends ConsumerState<ReadingPlanDetailScree
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                if (day.readingText != null) Text(day.readingText!),
+                                _PassageText(reference: day.reference, fallbackText: day.readingText),
                                 if (day.reflection != null) ...[
                                   const SizedBox(height: 12),
                                   Text('Reflection', style: Theme.of(context).textTheme.labelLarge),
@@ -138,6 +139,35 @@ class _ReadingPlanDetailScreenState extends ConsumerState<ReadingPlanDetailScree
           );
         },
       ),
+    );
+  }
+}
+
+/// Shows admin-entered text if there is any; otherwise fetches the
+/// actual scripture text live from the Bible API for [reference].
+class _PassageText extends ConsumerWidget {
+  const _PassageText({required this.reference, required this.fallbackText});
+
+  final String reference;
+  final String? fallbackText;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (fallbackText != null && fallbackText!.isNotEmpty) {
+      return Text(fallbackText!);
+    }
+
+    final passageAsync = ref.watch(biblePassageProvider(reference));
+    return passageAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8),
+        child: SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+      ),
+      error: (e, _) => Text(
+        'Could not load $reference right now.',
+        style: TextStyle(color: Theme.of(context).colorScheme.error),
+      ),
+      data: (passage) => Text(passage.text),
     );
   }
 }

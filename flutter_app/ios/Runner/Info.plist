@@ -26,6 +26,15 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Use Face ID to unlock the app when the biometric app lock is turned on.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Choose a photo to use as your profile picture.</string>
+	<!-- AdMob requires this at the native level before MobileAds.initialize()
+	     can succeed — Google's public test App ID by default (safe to ship
+	     during development), replace with your real one before release. -->
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3940256099942544~1458002511</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

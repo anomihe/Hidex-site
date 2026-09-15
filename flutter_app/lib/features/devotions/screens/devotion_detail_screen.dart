@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import '../../../core/bible/bible_providers.dart';
 import '../providers/devotions_providers.dart';
 import '../services/devotions_service.dart';
 
@@ -66,8 +67,7 @@ class _DevotionDetailScreenState extends ConsumerState<DevotionDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (devotion.verseText != null)
-                            Text(devotion.verseText!, style: const TextStyle(fontStyle: FontStyle.italic)),
+                          _VerseText(reference: devotion.verseReference!, fallbackText: devotion.verseText),
                           const SizedBox(height: 6),
                           Text(devotion.verseReference!, style: const TextStyle(fontWeight: FontWeight.w600)),
                         ],
@@ -95,6 +95,29 @@ class _DevotionDetailScreenState extends ConsumerState<DevotionDetailScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Shows admin-entered verse text if present; otherwise fetches it live
+/// from the Bible API for [reference].
+class _VerseText extends ConsumerWidget {
+  const _VerseText({required this.reference, required this.fallbackText});
+
+  final String reference;
+  final String? fallbackText;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (fallbackText != null && fallbackText!.isNotEmpty) {
+      return Text(fallbackText!, style: const TextStyle(fontStyle: FontStyle.italic));
+    }
+
+    final passageAsync = ref.watch(biblePassageProvider(reference));
+    return passageAsync.when(
+      loading: () => const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+      error: (e, _) => const SizedBox.shrink(),
+      data: (passage) => Text(passage.text, style: const TextStyle(fontStyle: FontStyle.italic)),
     );
   }
 }

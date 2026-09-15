@@ -12,6 +12,9 @@ class AppRoutes {
   static const treasureHunt = '/groups/:groupId/hunts/:huntId';
   static const rewards = '/rewards';
 
+  static const profile = '/profile';
+  static const donate = '/donate';
+
   static const readingPlans = '/reading-plans';
   static const readingPlanDetail = '/reading-plans/:planId';
 

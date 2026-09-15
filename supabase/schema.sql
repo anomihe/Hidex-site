@@ -72,15 +72,33 @@ create trigger profiles_set_updated_at
   before update on public.profiles
   for each row execute function public.set_updated_at();
 
--- Auto-create a profile row whenever a new auth user signs up.
+-- Auto-create a profile row whenever a new auth user signs up, seeded
+-- from the Google ID token claims Supabase merges into
+-- raw_user_meta_data on signInWithIdToken. Google's own claims are
+-- `name` and `picture`; Supabase's provider normalization also commonly
+-- adds `full_name` / `avatar_url` aliases, so both are checked
+-- defensively rather than assuming one key name.
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, display_name)
-  values (new.id, coalesce(new.raw_user_meta_data ->> 'display_name', 'New Believer'));
+  insert into public.profiles (id, display_name, avatar_url)
+  values (
+    new.id,
+    coalesce(
+      new.raw_user_meta_data ->> 'full_name',
+      new.raw_user_meta_data ->> 'name',
+      new.raw_user_meta_data ->> 'display_name',
+      split_part(new.email, '@', 1),
+      'New Believer'
+    ),
+    coalesce(
+      new.raw_user_meta_data ->> 'avatar_url',
+      new.raw_user_meta_data ->> 'picture'
+    )
+  );
   return new;
 end;
 $$;
